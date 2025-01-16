@@ -1,5 +1,14 @@
+import controller.GameController;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+//        GameController gameController = new GameController();
+//        Game game = gameController.startGame();
+
+//
+//        while(gameController.checkStatus(game2) == IN_PROGESS) {
+//            gameController.printBoard();
+//            gameController.makeMove();
+//        }
     }
 }
