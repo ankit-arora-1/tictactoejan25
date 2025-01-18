@@ -158,4 +158,115 @@ public class Game {
     public void setWinningStrategies(List<WinningStrategy> winningStrategies) {
         this.winningStrategies = winningStrategies;
     }
+
+    public void makeMove() {
+        Player currentMovePlayer = players.get(nextMovePlayerIndex);
+        System.out.println("It is " + currentMovePlayer.getName() + "'s turn. " +
+                "Please make your move");
+
+        Move move = currentMovePlayer.makeMove(board);
+        if(!validate(move)) {
+            System.out.println("Invalid move. Please try again");
+            return;
+        }
+
+        int row = move.getCell().getRow();
+        int col = move.getCell().getCol();
+
+        Cell cellTpUpdate = board.getBoard().get(row).get(col);
+        cellTpUpdate.setCellState(CellState.FILLED);
+        cellTpUpdate.setPlayer(currentMovePlayer);
+
+        moves.add(new Move(cellTpUpdate, currentMovePlayer));
+
+        nextMovePlayerIndex += 1;
+        nextMovePlayerIndex %= players.size();
+
+        if(checkWinner(move)) {
+            gameState = GameState.WINNER;
+            winner = currentMovePlayer;
+        } else if(moves.size() == board.getSize() * board.getSize()) {
+            gameState = GameState.DRAW;
+        }
+    }
+
+    public void undo() {
+        if(moves.size() == 0) {
+            System.out.println("Board is empty. Nothing to undo");
+            return;
+        }
+
+        Move lastMove = moves.get(moves.size() - 1);
+        moves.remove(lastMove);
+
+        Cell cell = lastMove.getCell();
+        cell.setCellState(CellState.EMPTY);
+        cell.setPlayer(null);
+
+        nextMovePlayerIndex -= 1;
+
+        for(WinningStrategy winningStrategy: winningStrategies) {
+            winningStrategy.handleUndo(board, lastMove);
+        }
+    }
+
+    public void printBoard() {
+        board.printBoard();
+    }
+
+    private boolean validate(Move move) {
+        int row = move.getCell().getRow();
+        int col = move.getCell().getCol();
+
+        if(row >= board.getSize()) {
+            return false;
+        }
+
+        if(col >= board.getSize()) {
+            return false;
+        }
+
+        if(board
+                .getBoard()
+                .get(row)
+                .get(col)
+                .getCellState()
+                .equals(CellState.EMPTY)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean checkWinner(Move move) {
+        for(WinningStrategy winningStrategy: winningStrategies) {
+            if(winningStrategy.checkWinner(board, move)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
